@@ -155,7 +155,7 @@ class PersonalViewController: UIViewController, BLTabBarContentVCProtocol {
             WebRequest.logout {
                 ApiRequest.logout { hasRemainingAccount in
                     if hasRemainingAccount {
-                        AccountManager.shared.refreshActiveAccountProfile()
+                        AppDelegate.shared.resetTabBar()
                     } else {
                         AppDelegate.shared.showLogin()
                     }

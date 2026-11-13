@@ -21,6 +21,12 @@ struct LoginToken: Codable, Equatable {
 enum ApiRequest {
     static let appkey = "5ae412b53418aac5"
     static let appsec = "5b9cf6c9786efd204dcf0c1ce2d08436"
+    private static let loginSession: Session = {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.httpCookieStorage = nil
+        configuration.httpShouldSetCookies = false
+        return Session(configuration: configuration)
+    }()
 
     enum EndPoint {
         static let loginQR = "https://passport.bilibili.com/x/passport-tv-login/qrcode/auth_code"
@@ -84,21 +90,22 @@ enum ApiRequest {
                             complete: ((Result<JSON, RequestError>) -> Void)? = nil)
     {
         var parameters = parameters
-        if auth {
-            parameters["access_key"] = getToken()?.accessToken
-        }
+        let requestToken = auth ? getToken() : nil
+        if auth { parameters["access_key"] = requestToken?.accessToken }
         parameters = sign(for: parameters)
-        AF.request(url, method: method, parameters: parameters, encoding: encoding).responseData { response in
+        let session = auth ? AF : loginSession
+        session.request(url, method: method, parameters: parameters, encoding: encoding).responseData { response in
             switch response.result {
             case let .success(data):
                 let json = JSON(data)
-                print(json)
                 let errorCode = json["code"].intValue
                 if errorCode != 0 {
-                    if errorCode == -101 {
+                    if errorCode == -101, let requestToken, getToken() == requestToken {
                         AccountManager.shared.handleAuthenticationFailure()
                         if !AccountManager.shared.isLoggedIn {
                             AppDelegate.shared.showLogin()
+                        } else {
+                            AppDelegate.shared.resetTabBar()
                         }
                     }
                     let message = json["message"].stringValue
@@ -215,7 +222,6 @@ enum ApiRequest {
             case var .success(res):
                 res.tokenInfo.expireDate = Date().addingTimeInterval(TimeInterval(res.tokenInfo.expiresIn))
                 let cookies = res.cookieInfo.toCookies()
-                CookieHandler.shared.saveCookie(list: cookies, syncWithAccount: false)
                 handler?(.success(token: res.tokenInfo, cookies: cookies))
             case let .failure(error):
                 switch error {
@@ -234,13 +240,15 @@ enum ApiRequest {
     }
 
     static func refreshToken() {
+        guard let originalToken = getToken() else { return }
         AF.cancelAllRequests()
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
-        request(EndPoint.refresh, method: .post, parameters: ["refresh_token": getToken()?.refreshToken ?? ""], decoder: decoder) {
+        request(EndPoint.refresh, method: .post, parameters: ["refresh_token": originalToken.refreshToken], decoder: decoder) {
             (result: Result<LoginResp, RequestError>) in
             switch result {
             case var .success(res):
+                guard getToken() == originalToken, res.tokenInfo.mid == originalToken.mid else { return }
                 res.tokenInfo.expireDate = Date().addingTimeInterval(TimeInterval(res.tokenInfo.expiresIn))
                 let cookies = res.cookieInfo.toCookies()
                 CookieHandler.shared.saveCookie(list: cookies)

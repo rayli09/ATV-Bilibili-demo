@@ -57,11 +57,11 @@ final class AccountManager {
                 guard let self else { return }
                 let profile: Profile
                 switch result {
-                case let .success(json):
+                case let .success(json) where json["mid"].intValue == token.mid:
                     profile = Profile(mid: json["mid"].intValue,
                                       username: json["uname"].stringValue,
                                       avatar: json["face"].stringValue)
-                case .failure:
+                default:
                     profile = Profile(mid: token.mid,
                                       username: "UID \(token.mid)",
                                       avatar: "")
@@ -129,14 +129,15 @@ final class AccountManager {
     }
 
     func refreshActiveAccountProfile() {
+        guard let mid = activeAccount?.profile.mid else { return }
         fetchProfile { [weak self] result in
             DispatchQueue.main.async {
-                guard let self else { return }
+                guard let self, self.activeAccount?.profile.mid == mid else { return }
                 switch result {
-                case let .success(json):
+                case let .success(json) where json["mid"].intValue == mid:
                     self.updateActiveProfile(username: json["uname"].stringValue,
                                              avatar: json["face"].stringValue)
-                case .failure:
+                default:
                     break
                 }
             }

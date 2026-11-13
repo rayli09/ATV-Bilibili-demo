@@ -1,3 +1,4 @@
+import Alamofire
 import Kingfisher
 import UIKit
 
@@ -131,6 +132,7 @@ final class AccountSwitcherViewController: UIViewController {
 
     private func switchToAccount(_ account: AccountManager.Account) {
         let currentMID = AccountManager.shared.activeAccount?.profile.mid
+        AF.cancelAllRequests()
         AccountManager.shared.setActiveAccount(account)
         dismiss(animated: true) {
             if currentMID == account.profile.mid {

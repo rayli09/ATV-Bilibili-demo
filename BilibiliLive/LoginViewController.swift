@@ -65,6 +65,8 @@ class LoginViewController: UIViewController {
     var currentLevel: Int = 0, finalLevel: Int = 200
     var timer: Timer?
     var oauthKey: String = ""
+    private var isLeavingLogin = false
+    private var isRegisteringAccount = false
 
     static func create() -> LoginViewController {
         LoginViewController()
@@ -77,11 +79,13 @@ class LoginViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        isLeavingLogin = false
         initValidation()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        isLeavingLogin = true
         qrcodeImageView.image = nil
         stopValidationTimer()
     }
@@ -132,7 +136,7 @@ class LoginViewController: UIViewController {
     func initValidation() {
         timer?.invalidate()
         ApiRequest.requestLoginQR { [weak self] code, url in
-            guard let self else { return }
+            guard let self, !self.isLeavingLogin else { return }
             let image = self.generateQRCode(from: url)
             self.qrcodeImageView.image = image
             self.oauthKey = code
@@ -142,7 +146,7 @@ class LoginViewController: UIViewController {
 
     func startValidationTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 4, repeats: true) { [weak self] _ in
-            guard let self = self else { return }
+            guard let self = self, !self.isLeavingLogin, !self.isRegisteringAccount else { return }
             self.currentLevel += 1
             if self.currentLevel > self.finalLevel {
                 self.stopValidationTimer()
@@ -162,17 +166,30 @@ class LoginViewController: UIViewController {
         stopValidationTimer()
     }
 
+    override func pressesEnded(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
+        if presses.contains(where: { $0.type == .menu }), AccountManager.shared.isLoggedIn {
+            guard !isRegisteringAccount else { return }
+            isLeavingLogin = true
+            stopValidationTimer()
+            AppDelegate.shared.showTabBar()
+            return
+        }
+        super.pressesEnded(presses, with: event)
+    }
+
     func loopValidation() {
         ApiRequest.verifyLoginQR(code: oauthKey) {
             [weak self] state in
-            guard let self = self else { return }
+            guard let self = self, !self.isLeavingLogin else { return }
             switch state {
             case .expire:
                 self.initValidation()
             case .waiting:
                 break
             case let .success(token, cookies):
-                print(token)
+                guard !self.isRegisteringAccount else { return }
+                self.isRegisteringAccount = true
+                self.stopValidationTimer()
                 AccountManager.shared.registerAccount(token: token, cookies: cookies) { [weak self] _ in
                     self?.didValidationSuccess()
                 }
