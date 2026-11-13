@@ -107,6 +107,11 @@ class VideoPlayerViewModel {
             let (resolvedPlayInfo, data) = try await loadVideoInfo(for: requestedPlayInfo)
             guard !Task.isCancelled, loadGeneration == generation else { return }
 
+            if playMode == .regular, sequenceProvider == nil {
+                sequenceProvider = await makeSequence(for: resolvedPlayInfo, detail: data.detail)
+                guard !Task.isCancelled, loadGeneration == generation else { return }
+            }
+
             let danmuProvider = VideoDanmuProvider(enableDanmuFilter: Settings.enableDanmuFilter,
                                                    enableDanmuRemoveDup: Settings.enableDanmuRemoveDup)
             // Previews do not install a danmaku plugin. For other modes, install
@@ -143,6 +148,29 @@ class VideoPlayerViewModel {
         let data = try await fetchVideoData(for: resolvedPlayInfo)
         try Task.checkCancellation()
         return (resolvedPlayInfo, data)
+    }
+
+    private func makeSequence(for info: PlayInfo, detail: VideoDetail?) async -> VideoSequenceProvider? {
+        var sequence: [PlayInfo] = []
+        if info.isBangumi, let seasonID = info.seasonId, seasonID > 0,
+           let season = try? await WebRequest.requestBangumiInfo(seasonID: seasonID)
+        {
+            let episodes = season.episodes + (season.section ?? []).flatMap(\.episodes)
+            sequence = episodes.map {
+                PlayInfo(aid: $0.aid, cid: $0.cid, epid: $0.id, seasonId: seasonID,
+                         subType: season.type, title: [$0.title, $0.long_title].filter { !$0.isEmpty }.joined(separator: " "))
+            }
+        } else if let detail {
+            let episodes = detail.View.ugc_season?.sections.flatMap(\.episodes) ?? []
+            if !episodes.isEmpty {
+                sequence = episodes.map { PlayInfo(aid: $0.aid, cid: $0.cid, title: $0.title) }
+            } else {
+                sequence = (detail.View.pages ?? []).map { PlayInfo(aid: info.aid, cid: $0.cid, title: $0.part) }
+            }
+        }
+        guard sequence.count > 1,
+              let index = sequence.firstIndex(where: { $0.aid == info.aid && $0.cid == info.cid }) else { return nil }
+        return VideoSequenceProvider(seq: sequence, currentIndex: index)
     }
 
     private func fetchVideoDetail(aid: Int, existing: VideoDetail?) async -> VideoDetail? {

@@ -8,7 +8,7 @@
 import UIKit
 
 class BLSettingLineCollectionViewCell: BLMotionCollectionViewCell {
-    let effectView = UIVisualEffectView(effect: UIBlurEffect(style: .light))
+    let effectView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
     let selectedWhiteView = UIView()
     let titleLabel = UILabel()
     override var isSelected: Bool {
@@ -36,12 +36,15 @@ class BLSettingLineCollectionViewCell: BLMotionCollectionViewCell {
         effectView.contentView.addSubview(titleLabel)
         titleLabel.snp.makeConstraints { make in
             make.leading.equalToSuperview().offset(26)
-            make.trailing.equalToSuperview().offset(20)
+            make.trailing.equalToSuperview().offset(-26)
             make.top.bottom.equalToSuperview().inset(8)
         }
         titleLabel.textAlignment = .left
         titleLabel.font = UIFont.systemFont(ofSize: 40, weight: .regular)
-        titleLabel.textColor = .black
+        titleLabel.textColor = .white
+        effectView.layer.borderWidth = 1
+        effectView.layer.borderColor = UIColor.white.withAlphaComponent(0.12).cgColor
+        updateView()
     }
 
     override func didUpdateFocus(in context: UIFocusUpdateContext, with coordinator: UIFocusAnimationCoordinator) {
@@ -51,6 +54,8 @@ class BLSettingLineCollectionViewCell: BLMotionCollectionViewCell {
 
     func updateView() {
         selectedWhiteView.isHidden = !(isFocused || isSelected)
+        selectedWhiteView.backgroundColor = isFocused ? .white : UIColor.white.withAlphaComponent(0.22)
+        titleLabel.textColor = isFocused ? .black : .white
     }
 
     static func makeLayout() -> UICollectionViewLayout {

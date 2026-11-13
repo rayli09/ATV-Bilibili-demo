@@ -23,6 +23,7 @@ class FeedCollectionViewCell: BLMotionCollectionViewCell {
 
     override func setup() {
         super.setup()
+        scaleFactor = 1.04
         let longpress = UILongPressGestureRecognizer(target: self, action: #selector(actionLongPress(sender:)))
         addGestureRecognizer(longpress)
 
@@ -107,7 +108,7 @@ class FeedCollectionViewCell: BLMotionCollectionViewCell {
             if pic.scheme == nil {
                 pic = URL(string: "http:\(pic.absoluteString)")!
             }
-            imageView.kf.setImage(with: pic, options: [.processor(DownsamplingImageProcessor(size: CGSize(width: 360, height: 202))), .cacheOriginalImage])
+            imageView.kf.setImage(with: pic, options: [.processor(DownsamplingImageProcessor(size: CGSize(width: 960, height: 540))), .cacheOriginalImage])
         }
         if let avatar = data.avatar(size: 240) {
             avatarView.isHidden = false
@@ -157,12 +158,20 @@ class FeedCollectionViewCell: BLMotionCollectionViewCell {
 }
 
 extension FeedDisplayStyle {
+    var cardHorizontalInset: CGFloat {
+        self == .large ? 24 : 20
+    }
+
+    var cardVerticalInset: CGFloat {
+        self == .large ? 24 : 16
+    }
+
     var fractionalWidth: CGFloat {
         switch self {
-        case .large, .sideBar:
-            return 0.33
-        case .normal:
-            return 0.25
+        case .large:
+            return 0.5
+        case .normal, .sideBar:
+            return 1.0 / 3.0
         }
     }
 
@@ -180,8 +189,10 @@ extension FeedDisplayStyle {
     var heightEstimated: CGFloat {
         switch self {
         case .large:
-            return 516
-        case .normal, .sideBar:
+            return 650
+        case .normal:
+            return 480
+        case .sideBar:
             return 380
         }
     }

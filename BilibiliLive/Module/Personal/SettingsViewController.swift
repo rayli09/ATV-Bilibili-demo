@@ -137,10 +137,6 @@ class SettingsViewController: UIViewController {
                 }
                 Toggle(title: "侧边栏菜单自动切换", setting: Settings.sideMenuAutoSelectChange, onChange: Settings.sideMenuAutoSelectChange.toggle())
 
-                Toggle(title: "不显示详情页直接进入视频",
-                       setting: Settings.direatlyEnterVideo,
-                       onChange: Settings.direatlyEnterVideo.toggle())
-
                 Actions(title: "视频详情相关推荐加载模式", message: "4k以上需要大会员",
                         current: Settings.showRelatedVideoInCurrentVC ? "页面刷新" : "新页面中打开",
                         options: [true, false],
@@ -462,9 +458,9 @@ extension FeedDisplayStyle {
     var desp: String {
         switch self {
         case .large:
-            return "3个"
+            return "2个"
         case .normal:
-            return "4个"
+            return "3个"
         case .sideBar:
             return "-"
         }

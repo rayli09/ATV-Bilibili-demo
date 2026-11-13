@@ -18,6 +18,7 @@ class StandardVideoCollectionViewController<T: PlayableData>: UIViewController, 
     var reloadInterval: TimeInterval = 60 * 60
     var reloading = false
     private var page = 0
+    private var loadGeneration = 0
     override var preferredFocusEnvironments: [UIFocusEnvironment] {
         return [collectionVC.collectionView]
     }
@@ -81,13 +82,20 @@ class StandardVideoCollectionViewController<T: PlayableData>: UIViewController, 
     func reallyReloadData() async {
         if reloading { return }
         reloading = true
+        loadGeneration += 1
+        let generation = loadGeneration
+        collectionVC.finishLoadingMore()
+        reloadStateDidChange()
         defer {
             reloading = false
+            reloadStateDidChange()
         }
-        lastReloadDate = Date()
-        page = 1
         do {
             let res = try await request(page: 1)
+            guard generation == loadGeneration else { return }
+            page = 1
+            lastReloadDate = Date()
+            collectionVC.finishLoadingMore()
             collectionVC.displayDatas = []
             collectionVC.appendData(displayData: res)
         } catch let err {
@@ -97,16 +105,26 @@ class StandardVideoCollectionViewController<T: PlayableData>: UIViewController, 
         }
     }
 
+    func reloadStateDidChange() {}
+
     // MARK: - Private
 
     private func loadMore() {
-        guard supportPullToLoad() else { return }
+        guard supportPullToLoad(), !reloading else {
+            collectionVC.finishLoadingMore()
+            return
+        }
+        let generation = loadGeneration
+        let nextPage = page + 1
         Task {
             do {
-                if let res = (try? await request(page: page + 1)) {
-                    collectionVC.appendData(displayData: res)
-                    page = page + 1
-                }
+                let res = try await request(page: nextPage)
+                guard generation == loadGeneration else { return }
+                collectionVC.appendData(displayData: res)
+                page = nextPage
+            } catch {
+                guard generation == loadGeneration else { return }
+                collectionVC.finishLoadingMore()
             }
         }
     }

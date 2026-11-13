@@ -242,15 +242,12 @@ class VideoDetailViewController: UIViewController {
         loadingView.makeConstraintsBindToCenterOfSuperview()
     }
 
-    func present(from vc: UIViewController, direatlyEnterVideo: Bool = Settings.direatlyEnterVideo) {
+    func present(from vc: UIViewController, direatlyEnterVideo: Bool = true) {
         if !direatlyEnterVideo {
             vc.present(self, animated: true)
         } else {
-            vc.present(self, animated: false) { [weak self] in
-                guard let self else { return }
-                let player = VideoPlayerViewController(playInfo: PlayInfo(aid: self.aid, cid: self.cid, epid: self.epid, seasonId: isBangumi ? self.seasonId : nil, lastPlayCid: self.lastPlayCid, playTimeInSecond: self.playTimeInSecond))
-                self.present(player, animated: true)
-            }
+            let player = VideoPlayerViewController(playInfo: PlayInfo(aid: aid, cid: cid, epid: epid, seasonId: seasonId))
+            vc.present(player, animated: true)
         }
     }
 

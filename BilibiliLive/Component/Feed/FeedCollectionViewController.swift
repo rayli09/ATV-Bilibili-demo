@@ -149,6 +149,10 @@ class FeedCollectionViewController: UIViewController {
         }
     }
 
+    func finishLoadingMore() {
+        isLoading = false
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: makeCollectionViewLayout())
@@ -183,7 +187,7 @@ class FeedCollectionViewController: UIViewController {
             widthDimension: .fractionalWidth(style.fractionalWidth),
             heightDimension: heightDimension
         ))
-        let hSpacing: CGFloat = style == .large ? 35 : 30
+        let hSpacing = style.cardHorizontalInset
         item.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: hSpacing, bottom: 0, trailing: hSpacing)
         let group = NSCollectionLayoutGroup.horizontal(
             layoutSize: NSCollectionLayoutSize(
@@ -193,7 +197,7 @@ class FeedCollectionViewController: UIViewController {
             repeatingSubitem: item,
             count: style.feedColCount
         )
-        let vSpacing: CGFloat = style == .large ? 24 : 16
+        let vSpacing = style.cardVerticalInset
         let baseSpacing: CGFloat = style == .sideBar ? 24 : 0
         group.edgeSpacing = NSCollectionLayoutEdgeSpacing(leading: .fixed(baseSpacing), top: .fixed(vSpacing), trailing: .fixed(0), bottom: .fixed(vSpacing))
         let section = NSCollectionLayoutSection(group: group)
@@ -284,8 +288,8 @@ extension FeedCollectionViewController: UICollectionViewDelegate {
 extension FeedDisplayStyle {
     var feedColCount: Int {
         switch self {
-        case .normal: return 4
-        case .large, .sideBar: return 3
+        case .large: return 2
+        case .normal, .sideBar: return 3
         }
     }
 }

@@ -30,9 +30,6 @@ enum Settings {
     @UserDefaultCodable("Settings.displayStyle", defaultValue: .normal)
     static var displayStyle: FeedDisplayStyle
 
-    @UserDefault("Settings.direatlyEnterVideo", defaultValue: false)
-    static var direatlyEnterVideo: Bool
-
     @UserDefaultCodable("Settings.mediaQuality", defaultValue: .quality_1080p)
     static var mediaQuality: MediaQualityEnum
 
