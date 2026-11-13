@@ -68,6 +68,39 @@ enum TabBarPage: String, CaseIterable, Codable {
         }
     }
 
+    var systemIcon: String {
+        switch self {
+        case .live:
+            return "antenna.radiowaves.left.and.right"
+        case .feed:
+            return "house"
+        case .hot:
+            return "flame"
+        case .ranking:
+            return "trophy"
+        case .follows:
+            return "person.2.fill"
+        case .favorite:
+            return "star.fill"
+        case .personal:
+            return "person.fill"
+        case .search:
+            return "magnifyingglass"
+        case .followBangumi:
+            return "tv.fill"
+        case .followUps:
+            return "person.2.fill"
+        case .toView:
+            return "clock.fill"
+        case .history:
+            return "clock.arrow.counterclockwise"
+        case .weeklyWatch:
+            return "calendar"
+        case .tvRecommend:
+            return "sparkles.tv"
+        }
+    }
+
     static var defaultTabBarPages: [TabBarPage] {
         [.live, .feed, .hot, .ranking, .follows, .favorite, .personal, .search]
     }

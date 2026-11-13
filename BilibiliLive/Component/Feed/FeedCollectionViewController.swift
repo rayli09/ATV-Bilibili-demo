@@ -198,7 +198,7 @@ class FeedCollectionViewController: UIViewController {
             count: style.feedColCount
         )
         let vSpacing = style.cardVerticalInset
-        let baseSpacing: CGFloat = style == .sideBar ? 24 : 0
+        let baseSpacing: CGFloat = style == .sideBar ? 8 : 0
         group.edgeSpacing = NSCollectionLayoutEdgeSpacing(leading: .fixed(baseSpacing), top: .fixed(vSpacing), trailing: .fixed(0), bottom: .fixed(vSpacing))
         let section = NSCollectionLayoutSection(group: group)
         if baseSpacing > 0 {
@@ -289,7 +289,8 @@ extension FeedDisplayStyle {
     var feedColCount: Int {
         switch self {
         case .large: return 2
-        case .normal, .sideBar: return 3
+        case .normal: return 4
+        case .sideBar: return 3
         }
     }
 }

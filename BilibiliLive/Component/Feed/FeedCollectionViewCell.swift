@@ -34,7 +34,7 @@ class FeedCollectionViewCell: BLMotionCollectionViewCell {
             make.top.equalToSuperview()
             make.height.equalTo(imageView.snp.width).multipliedBy(9.0 / 16)
         }
-        imageView.layer.cornerRadius = 12
+        imageView.layer.cornerRadius = 8
         imageView.clipsToBounds = true
         imageView.contentMode = .scaleAspectFill
 
@@ -51,7 +51,7 @@ class FeedCollectionViewCell: BLMotionCollectionViewCell {
         contentView.addSubview(infoView)
         infoView.snp.makeConstraints { make in
             make.leading.trailing.bottom.equalToSuperview()
-            make.top.equalTo(imageView.snp.bottom).offset(8)
+            make.top.equalTo(imageView.snp.bottom).offset(6)
         }
 
         let hStackView = UIStackView()
@@ -66,7 +66,7 @@ class FeedCollectionViewCell: BLMotionCollectionViewCell {
         }
 
         hStackView.alignment = .top
-        hStackView.spacing = 10
+        hStackView.spacing = 6
         avatarView.backgroundColor = .clear
         avatarView.snp.makeConstraints { make in
             make.width.equalTo(avatarView.snp.height)
@@ -82,7 +82,7 @@ class FeedCollectionViewCell: BLMotionCollectionViewCell {
         stackView.addArrangedSubview(titleLabel)
         stackView.addArrangedSubview(upLabel)
         stackView.alignment = .leading
-        stackView.spacing = 6
+        stackView.spacing = 4
         stackView.setContentHuggingPriority(.required, for: .vertical)
         titleLabel.holdScrolling = true
         titleLabel.setContentHuggingPriority(.required, for: .vertical)
@@ -159,18 +159,20 @@ class FeedCollectionViewCell: BLMotionCollectionViewCell {
 
 extension FeedDisplayStyle {
     var cardHorizontalInset: CGFloat {
-        self == .large ? 24 : 20
+        self == .large ? 14 : 12
     }
 
     var cardVerticalInset: CGFloat {
-        self == .large ? 24 : 16
+        self == .large ? 10 : 8
     }
 
     var fractionalWidth: CGFloat {
         switch self {
         case .large:
             return 0.5
-        case .normal, .sideBar:
+        case .normal:
+            return 1.0 / 4.0
+        case .sideBar:
             return 1.0 / 3.0
         }
     }
@@ -189,11 +191,11 @@ extension FeedDisplayStyle {
     var heightEstimated: CGFloat {
         switch self {
         case .large:
-            return 650
+            return 600
         case .normal:
-            return 480
+            return 360
         case .sideBar:
-            return 380
+            return 320
         }
     }
 
@@ -202,9 +204,9 @@ extension FeedDisplayStyle {
         case .large:
             return UIFont.preferredFont(forTextStyle: .headline)
         case .normal:
-            return UIFont.systemFont(ofSize: 30, weight: .semibold)
+            return UIFont.systemFont(ofSize: 28, weight: .semibold)
         case .sideBar:
-            return UIFont.systemFont(ofSize: 26, weight: .semibold)
+            return UIFont.systemFont(ofSize: 24, weight: .semibold)
         }
     }
 
@@ -213,9 +215,9 @@ extension FeedDisplayStyle {
         case .large:
             return UIFont.preferredFont(forTextStyle: .footnote)
         case .normal:
-            return UIFont.systemFont(ofSize: 24)
+            return UIFont.systemFont(ofSize: 21)
         case .sideBar:
-            return UIFont.systemFont(ofSize: 20, weight: .semibold)
+            return UIFont.systemFont(ofSize: 19, weight: .semibold)
         }
     }
 }

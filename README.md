@@ -26,6 +26,10 @@
 - HDR播放
 - 字幕
 
+### 图标素材
+
+像素风图标由 `Artwork/pixel-icon.png` 和 `scripts/generate-pixel-icon.swift` 生成；在仓库根目录运行 `swift scripts/generate-pixel-icon.swift` 可重新生成 tvOS 分层图标资源。
+
  ![](imgs/1.jpg)
  ![](imgs/2.jpg)
  ![](imgs/3.png)

@@ -11,13 +11,12 @@ import UIKit
 class BLOverlayView: UIView {
     // MARK: - UI Elements
 
-    var fontSize: CGFloat = 21
+    var fontSize: CGFloat = 19
 
     // 1. 渐变层
     private let gradientLayer: CAGradientLayer = {
         let layer = CAGradientLayer()
-        // 透明 -> 黑色(60%透明度)
-        layer.colors = [UIColor.clear.cgColor, UIColor.black.withAlphaComponent(0.6).cgColor]
+        layer.colors = [UIColor.clear.cgColor, UIColor.black.withAlphaComponent(0.45).cgColor]
         layer.locations = [0.0, 1.0]
         return layer
     }()
@@ -76,9 +75,7 @@ class BLOverlayView: UIView {
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        // 关键：在这里更新渐变层的 frame，确保它始终位于视图底部
-        // 假设渐变层高度为 40pt
-        let gradientHeight: CGFloat = 60
+        let gradientHeight: CGFloat = 48
         gradientLayer.frame = CGRect(
             x: 0,
             y: bounds.height - gradientHeight,
